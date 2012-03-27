@@ -56,15 +56,24 @@ function da_create_menu() {
 	
 }
 
-
 function da_register_settings() {
 	//register settings
 	register_setting( 'da-settings-group', 'digital_analytix_code' );
 }
 
-function insert_digitalanalytix_code() {
-echo get_option('digital_analytix_code');
+add_filter('template_include','yoursite_template_include',1);
+
+function yoursite_template_include($template) {
+	ob_start();
+	return $template;
+}
+add_filter('shutdown','yoursite_shutdown',0);
+function yoursite_shutdown() {
+	$insert =  get_option('digital_analytix_code');
+	$content = ob_get_clean();
+	$content = preg_replace('#<body([^>]*)>#i',"<body$1>{$insert}",$content);
+	echo $content;
 }
 
-add_action('wp_footer', 'insert_digitalanalytix_code');
+
 ?>

@@ -28,19 +28,29 @@ register_uninstall_hook(__FILE__, 'da_uninstall');
 
 // activating the default values
 function da_activate() {
-	add_option('digital_analytix_code', 'any_value');
+	add_option('country', 'any_value');
+	add_option('client', 'any_value');
+	add_option('site', 'any_value');	
+	add_option('pagename', '_default_');	
+	
 }
 
 // deactivating
 function da_deactivate() {
 	// needed for proper deletion of every option
-	delete_option('digital_analytix_code');
+	delete_option('country');
+	delete_option('client');
+	delete_option('site');
+	delete_option('pagename');
 }
 
 // uninstalling
 function da_uninstall() {
 	# delete all data stored
-	delete_option('digital_analytix_code');
+	delete_option('country');
+	delete_option('client');
+	delete_option('site');
+	delete_option('pagename');
 }
 
 function da_create_menu() {
@@ -58,22 +68,40 @@ function da_create_menu() {
 
 function da_register_settings() {
 	//register settings
-	register_setting( 'da-settings-group', 'digital_analytix_code' );
+	register_setting( 'da-settings-group', 'country' );
+	register_setting( 'da-settings-group', 'client' );
+	register_setting( 'da-settings-group', 'site' );
+	register_setting( 'da-settings-group', 'pagename' );
 }
 
-add_filter('template_include','yoursite_template_include',1);
 
-function yoursite_template_include($template) {
-	ob_start();
-	return $template;
-}
-add_filter('shutdown','yoursite_shutdown',0);
-function yoursite_shutdown() {
-	$insert =  get_option('digital_analytix_code');
-	$content = ob_get_clean();
-	$content = preg_replace('#<body([^>]*)>#i',"<body$1>{$insert}",$content);
-	echo $content;
+
+function dax_code() { 
+	$country = get_option('country');
+	$client = get_option('client');
+	$site = get_option('site');
+	$pagename = get_option('pagename');
+
+	?>
+	<!-- Begin CMC v2.0 -->
+	<script type="text/javascript">
+	// <![CDATA[
+	function sitestat(u){var d=document,l=d.location;ns_pixelUrl=u+"&ns__t="+(new Date().getTime());u=ns_pixelUrl+"&ns_c="+((d.characterSet)?d.characterSet:d.defaultCharset)+"&ns_ti="+escape(d.title)+"&ns_jspageurl="+escape(l&&l.href?l.href:d.URL)+"&ns_referrer="+escape(d.referrer);var m=u.lastIndexOf("&");if(u.length>2000&&m>=0){u=u.substring(0,m+1)+"ns_cut="+u.substring(m+1,u.lastIndexOf("=")).substring(0,40)}(d.images)?new Image().src=u:d.write('<'+'p><'+'img src="'+u+'" height="1" width="1" alt="*"'+'><'+'/p>');};
+	sitestat("//<?php echo $country ?>.sitestat.com/<?php echo $client ?>/<?php echo $site ?>/s?name=<?php echo $pagename ?>");
+	// ]]>
+	</script>
+
+
+	<noscript><p><img src="//<?php echo $country ?>.sitestat.com/<?php echo $client ?>/<?php $site ?>/s?name=<?php echo $pagename ?>" height="1" width="1" alt="*"></p></noscript>
+	<!-- End CMC -->
+	
+<?php 
+
+
+
 }
 
+
+add_filter('wp_footer','dax_code');
 
 ?>
